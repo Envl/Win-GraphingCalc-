@@ -138,14 +138,14 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_WINDOWSFINALCAL));
+	wcex.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground =(HBRUSH)GetStockObject(NULL_BRUSH);
 		//(HBRUSH)CreatePatternBrush(hBitmap); //这是另一种方案
 	wcex.lpszMenuName = NULL;
 //MAKEINTRESOURCE(IDC_WINDOWSFINALCAL);
 	wcex.lpszClassName	= szWindowClass;
-	wcex.hIconSm =  LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wcex.hIconSm =  LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON1));
 
 	return RegisterClassEx(&wcex);
 }
@@ -437,7 +437,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SetWindowText(hStaticText, expression4Display);
 			break;
 		case 24:
-			lstrcat(expression, TEXT("3.1415926"));
+			lstrcat(expression, TEXT("3.14159265358979"));
 			//SetWindowText(hStaticText, expression);
 			lstrcat(expression4Display, TEXT("π"));
 			SetWindowText(hStaticText, expression4Display);
@@ -694,14 +694,15 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 
 	static float floatReplacement4X;
 	static char BufferBuffer[24];
-	static TCHAR tmpString[300] = { '(' };
+	static TCHAR tmpString[300] = { 0 };
 	static HBRUSH hBmBrush;
 	static int position4EachX;
 	static int Y4Print, X4Print, CenterWindowPixelY, CenterWindowPixelX;
 
 
 	if (isTheFistTime){//WM_CREATE消息不响应  于是这样。
-		pen4s_hdcMem = CreatePen(PS_SOLID, 1, GetSysColor(COLOR_WINDOW));
+		
+		pen4s_hdcMem = CreatePen(PS_SOLID, 1, RGB(204, 237, 199));
 
 		hBitmap = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAPBG));
 		if (hBitmap == NULL)
@@ -851,7 +852,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 
 
 		//设置文本颜色以及文本背景颜色
-		SetTextColor(s_hdcMem, GetSysColor(COLOR_WINDOW));
+		SetTextColor(s_hdcMem, RGB(204, 237, 199));
 		SetBkMode(s_hdcMem, TRANSPARENT);
 		//SetBkColor(hdc, GetSysColor(COLOR_WINDOW));
 
@@ -975,7 +976,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			CharToTchar(BufferBuffer, tcharReplacement4X);
 			hdc = GetDC(hwnd);
 			
-			SetTextColor(hdc, GetSysColor(COLOR_WINDOW));
+			SetTextColor(hdc, RGB(204, 237, 199));
 			SetBkColor(hdc, RGB(40, 40, 40));
 
 			TextOut(hdc, 0, 0, TEXT("x= "), 3);

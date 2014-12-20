@@ -6,7 +6,6 @@
 #include<math.h>
 #include<string.h>
 #define max1 200
-#define π 3.1415926
 using namespace std;
 char ex[max1];/*存储后缀表达式*/
  bool computed = true;//标志 是否已经计算过表达式
@@ -298,7 +297,7 @@ void ReplaceString(TCHAR* destination,TCHAR*  insertion,int position){
 void trans(int length,TCHAR* str)
 {
 	//TCHAR str[max];/*存储原算术表达式*/
-	char stack[max1];/*作为栈使用*/
+	char stack[max1]={0};/*作为栈使用*/
 	char ch;
 	int sum, i,  t, top = 0;
 	i = length;
@@ -322,17 +321,21 @@ void trans(int length,TCHAR* str)
 	//
 	while (ch != '#')
 	{
-		
+		if (top >= 0)
 		switch (ch)
 		{
 		case'(':	 /*判定为左括号*/
-			top++; stack[top] = ch;
+			top++; 
+			if (top >= 0)
+				stack[top] = ch;
 			break;
 
 		case')':	/*判定为右括号*/
-			while (stack[top] != '(')
+			if (top >= 0)
+				while (stack[top] != '(')
 			{
-				ex[t] = stack[top]; top--; t++;
+				if (top >= 0)
+					ex[t] = stack[top]; top--; t++;
 			}
 			top--;
 			break;
@@ -437,7 +440,7 @@ void trans(int length,TCHAR* str)
 void compvalue()
 {
 	flag4Alert = false;//每次进入函数都要改成初始状态 false
-	double stack[max1], d, f;/*作为栈使用*/
+	double stack[max1] = { 0 }, d, f;/*作为栈使用*/
 	char ch;
 	int t = 1, top = 0;/*t为ex下标，top为stack下标*/
 	ch = ex[t]; t++;
@@ -445,7 +448,8 @@ void compvalue()
 	{
 		switch (ch)
 		{
-		case'+':
+		case'+':			
+			if (top >= 1)
 			stack[top - 1] = stack[top - 1] + stack[top];
 			top--;
 			break;
@@ -597,16 +601,19 @@ void compvalue()
 		flag4TAN = false;
 		}
 
-	result = stack[top];
+	if (top >= 0)
+		result = stack[top];
 	
 	if (result == -0.000000)
 		flag4NotDraw = true;
 	//下面行把数字转成字符
 	TCHAR szBuffer[64];//定义并申请输入缓冲区空间
 	char BufferBuffer[64];
-	if (stack[top] == -9.2559631349317831e+061)
+	if (top >= 0)
+		if (stack[top] == -9.2559631349317831e+061)
 	{
-		stack[top] = 0;
+		if (top >= 0)
+			stack[top] = 0;
 		result = 0;
 		computed = true;
 	}
