@@ -238,12 +238,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	TCHAR tmpChar;//用来键盘输入各种算术符号
 	switch (message)
 	{
-	case WM_CTLCOLORBTN:
-		SetBkColor((HDC)wParam, RGB(255, 222, 255));
-		return(LRESULT)GetStockObject(WHITE_BRUSH);
-		break;
+	
 	case WM_CREATE:
-		LoadKeyboardLayout(TEXT("0x0409"), KLF_ACTIVATE | KLF_SETFORPROCESS);//更改键盘布局,这样就是英文输入状态,就能接受键盘 key 和 chars消息了.
+		//更改键盘布局,这样就是英文输入状态,就能接受键盘 key 和 chars消息了.
+		LoadKeyboardLayout(TEXT("0x0409"), KLF_ACTIVATE | KLF_SETFORPROCESS);
 		// 设置分层属性  
 		SetWindowLong(hWnd, GWL_EXSTYLE, GetWindowLong(hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
 		SetLayeredWindowAttributes(hWnd, RGB(5, 255, 255), 233, LWA_ALPHA | LWA_COLORKEY);
@@ -369,7 +367,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			flag4Drawing = false;//计算表达式结果，表明此时不在绘图
 			
 			//if (expression[0] == 'y')
-				//PostMessage(hWnd, WM_COMMAND, 37, 1);//画图只许用指定的快捷键，不能用enter，舍弃这三句
+				//PostMessage(hWnd, WM_COMMAND, 37, 1);  //画图只许用指定的快捷键，不能用enter，--------------Single Path ---------
 			//else	
 			
 			if (computed){
@@ -384,13 +382,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					expressionRepair(expression);
 					trans(GetWindowTextLength(hStaticText), expression);//以上函数来自 同名.h 头文件 转换成逆波兰式
 					compvalue();
-					if (!flag4Alert)//用来计算的式子检测没问题才会显示出来
+					if (!flag4Alert)//用来计算的式子检测没问题才会显示出来,否则就会显示之前 的错误信息
 						SetWindowText(hStaticText, value);
-					//else
-						//SetWindowText(hStaticText, TEXT("表达式有误"));
 
 					computed = true;
-					//flag4Check = false;
 					//int a=0; 用来设置断点的
 				}
 				else{
@@ -410,15 +405,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			break;
 		case 21:
-			//SendMessage(hWnd, WM_SYSKEYDOWN, VK_MENU, 0);
-
-			SendMessage(hWnd, WM_SYSKEYDOWN, VK_SHIFT, lParam<<29);
-
-//			Sleep(50);
-
-	//		SendMessage(hWnd, WM_SYSKEYUP, VK_SHIFT, 0);
-
-			//SendMessage(hWnd, WM_SYSKEYUP, VK_MENU, 0);
 			lstrcat(expression, TEXT("s("));
 			//SetWindowText(hStaticText, expression);
 			lstrcat(expression4Display, TEXT("sin("));
@@ -472,7 +458,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (expression[0] == 'y')
 			{
 				//去除表达式中的 'y=' 这两个字符
-				//lstrcat(expression, TEXT("\0"));
 				TCHAR tmpExpression[257] = { 0 };
 				int movelen = lstrlen(expression) - 2;
 				CopyMemory(tmpExpression, expression + 2, movelen*sizeof(expression[0]));
@@ -496,8 +481,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		
 			break;
 		default:
-			//GetWindowText(hwndButton[wmId],* buttonText, 10);
-
 			SetFocus(hWnd);//焦点给主窗口hWnd   以让它接收键盘消息
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -505,18 +488,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			SetFocus(hWnd);
 
 		break;
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_SPACE:
-			if (HIBYTE(GetKeyState(VK_CONTROL))){
 
-			}
-			break;
-		default:
-			break;
-		}
-		break;
 	case WM_CHAR:
 		if (computed)//这样实现接着使用上次的计算结果进行计算
 			if (wParam == '+' || wParam == '-' || wParam == '*' || wParam == '/' || wParam == '%' || wParam == '!')
@@ -533,7 +505,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			else if (wParam == 'd' || wParam == 'D' || wParam == 'h' || wParam == 'H' ){
 				//什么也不做
 			}
-			else
+			else//如果是按其他的键,就清空表达式,重新接受新的表达式
 			{
 				ZeroMemory(expression, lstrlen(expression)*sizeof(expression[0]));
 				ZeroMemory(expression4Display, lstrlen(expression4Display)*sizeof(expression4Display[0]));
@@ -545,10 +517,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			switch (wParam)
 			{
 			case'\b':   //backspace
-				//SendMessage(hwndButton[2], BM_SETSTATE, 1, 0);//改变按钮状态，1 代表按下，0代表弹出
-
 				SendMessage(hWnd, WM_COMMAND, 3, 1);
-
 				break;
 			case '\x1B':                  // escape
 				SendMessage(hWnd, WM_COMMAND, 2, 1);
@@ -558,14 +527,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 			case'1':case'2':case'3':case'4':case'5':case'6':
 			case'7':case'8':case'9':case'0':
-				//不用EDIT 控件 了  就没必要下面这样做了
-				/*TCHAR szBuffer[24];//定义并申请输入缓冲区空间
-				char BufferBuffer[24];
-				sprintf_s(BufferBuffer, "%d", (wParam - '0' ));
-				CharToTchar(BufferBuffer, szBuffer);
-				lstrcat(expression,szBuffer);
-				SetWindowText(hStaticText, expression);*/
-				//break;
 			case'(':case')':case'x':case'=':case'y':
 			case'-':case'+':case'*':case'/':case'!':case'^':
 			case'%':
@@ -631,11 +592,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		// TODO:  在此添加任意绘图代码...
-		EndPaint(hWnd, &ps);
-		break;
+
 	case WM_DESTROY:
 		DeleteDC(s_hdcMem);
 		xmove = 0;
@@ -675,35 +632,29 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 	HDC hdc;
 	RECT wndRect=RECT();
 	GetClientRect(hwnd, &wndRect);
-
 	ww = wndRect.right - wndRect.left;//窗口宽度
 	int wh = wndRect.bottom - wndRect.top;//窗口高度
-
-	static float d = 53;//x值域   初始为[-ww*2/53，ww*2/53]  ,53在我的电脑上是一厘米的像素个数  1600 X 900 分辨率
 	
-	//static bool flag4LBDown = false;//鼠标左键是否点击下去的flag
+	static float d = 53;//x值域   初始为[-ww*2/53，ww*2/53]  ,53在我的电脑上是一厘米的像素个数  1600 X 900 分辨率 13.3英寸
 	static POINT pt = { 0, 0 };//存放之前鼠标所在点
-
-
 	static HDC s_hdcMem; //放置缩放后的位图  
 	static HPEN pen4s_hdcMem;
 
 	HBITMAP hbmp;
-	BITMAP bm;
-	HDC hdcTemp;
 
-	static float floatReplacement4X;
-	static char BufferBuffer[24];
+	static float floatReplacement4X;//画图时用来替换每一个'x'字符为数字字符
+	static char BufferBuffer[24];//char转TCHAR用来中转的 由于sprintf_s不支持转成TCHAR
 	static TCHAR tmpString[300] = { 0 };
 	static HBRUSH hBmBrush;
-	static int position4EachX;
-	static int Y4Print, X4Print, CenterWindowPixelY, CenterWindowPixelX;
-
+	static int position4EachX;//画图时用来 计数x有几个
+	static int Y4Print, X4Print, CenterWindowPixelY, CenterWindowPixelX;//画图要用的坐标
+	static int formerX=0, formerY=0;//用来保存之前的x y
+	static RECT rect4DashLine;//用来清空之前画的虚线;
+	static bool flag4Drew=false;//是否画完了图像
 
 	if (isTheFistTime){//WM_CREATE消息不响应  于是这样。
 		
 		pen4s_hdcMem = CreatePen(PS_SOLID, 1, RGB(204, 237, 199));
-
 		hBitmap = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAPBG));
 		if (hBitmap == NULL)
 		{
@@ -723,46 +674,33 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		isTheFistTime = false;
 	}
 
-	
 	//int id = GetWindowLong(hwnd, GWL_ID);//暂未用到
 	switch (message)
 	{
 	case WM_SIZE:
-		//GetClientRect(hwnd, &wndRect);
-
 		ww = wndRect.right - wndRect.left;//窗口宽度
 		wh = wndRect.bottom - wndRect.top;//窗口高度
 		hdc = GetDC(hwnd);
-		//s_hdcMem = CreateCompatibleDC(hdc);
 		hbmp = CreateCompatibleBitmap(hdc, ww, wh);
 		ReleaseDC(hwnd, hdc);
 		SelectObject(s_hdcMem, hbmp);//建立个绘图客户区等大的兼容DC
 		DeleteObject(hbmp);
-		//InvalidateRect(hwnd, &wndRect, true);//客户区全部无效化保证完全重绘
 
 		break;
 	case WM_PAINT:
 	{
 
+		//设置文本颜色以及文本背景颜色
+		SetTextColor(s_hdcMem, RGB(204, 237, 199));
+		SetBkMode(s_hdcMem, TRANSPARENT);
 
+		SelectObject(s_hdcMem, pen4s_hdcMem);//GetStockObject(WHITE_PEN));
 
-		//hdcTemp = CreateCompatibleDC(hdc);
-		//SelectObject(hdcTemp, hBitmap);
+		FillRect(s_hdcMem, &wndRect, hBmBrush);//清空背景
+		
+		/*下面是计算部分,确定每一个x对应的y然后依次描点连线*/
 
-	
-
-		// 将原位图缩放到窗口大小  
-		//GetObject(hBitmap, sizeof(bm), &bm);
-		//StretchBlt(s_hdcMem, 0, 0, ww, wh, hdcTemp, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
-
-
-
-		// TODO:  在此添加任意绘图代码...
-		//SelectObject(hdc, CreatePen(PS_SOLID, 1, GetSysColor(COLOR_WINDOW)));//GetStockObject(WHITE_PEN));
-		//FillRect(hdc, &wndRect, hBmBrush);
-		FillRect(s_hdcMem, &wndRect, hBmBrush);
-		//BitBlt(hdc, 0, 0, ww, wh, s_hdcMem, 0, 0, SRCCOPY);
-		for (int a = 0; a < 10; a++)
+		for (int a = 0; a < 10; a++)//确定表达式中哪些位置是x,要被替换为数字
 		{
 			PositionOfX[a] = -1;
 		}
@@ -778,8 +716,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		for (int i = 0; i <= Point_Sum; i++)
 		{
 			CopyMemory(Expression, expression, (lstrlen(expression))*sizeof(expression[0]));
-
-
+			
 			//x取不同的实际值，用来替代表达式中的x 
 			floatReplacement4X = (float)(i - Point_Sum / 2 + xmove)/d;//这就是真正的物理x值   单位是厘米 
 
@@ -792,7 +729,6 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			lstrcat(tmpString, TEXT(")"));
 			ZeroMemory(tcharReplacement4X,24*sizeof(expression[0]));//先清空它再 复制数字字符给他
 			CopyMemory(tcharReplacement4X, tmpString, (lstrlen(tmpString))*sizeof(tmpString[0]));//这样tcharReplacement4X 就被括号包起来了
-			//ZeroMemory(tmpString, lstrlen(tmpString)*sizeof(expression[0]));//这句可以省略貌似
 
 			for (int p = 9; p >=0; p--){
 				if (PositionOfX[p] != -1)
@@ -804,23 +740,21 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			trans(lstrlen(Expression), Expression);
 			compvalue();//至此，只是得到了原始的真实物理x，y坐标  分别是 ffloatReplacement4X   、  value
 		
-			//下面开始绘图！！！！ 好！！
-			SelectObject(s_hdcMem, pen4s_hdcMem);//GetStockObject(WHITE_PEN));
-
+			/*下面开始绘图！！！！ 好！！*/
+			
 			//以窗口中心为原点的x 、y像素坐标
 			 CenterWindowPixelX =(floatReplacement4X*d-xmove);		//这个是真的x坐标
 				//i*ww / Point_Sum - Point_Sum / 2; //这个是不变的x坐标，只由窗口宽度决定  现已舍弃
 			 CenterWindowPixelY = result*d;
 
-
 			 X4Print = CenterWindowPixelX + ww / 2;//左上角为原点的 屏幕 x、y像素坐标
 			 Y4Print =wh/2- CenterWindowPixelY-ymove;//y轴方向的拖动  由ymove体现出来 --------------------------------------------
 			ZeroMemory(Expression, lstrlen(Expression)*sizeof(Expression[0]));//这句是必须的
 			//int a = 0;//为了设置断点
-			//以下这堆逻辑实现了，跳过  不在定义域内的点 绘图。
+			//以下这堆逻辑实现了，跳过 『 不在定义域内的点 』绘图。
 			if (i == 0)
 			{
-				//MoveToEx(hdc, X4Print, Y4Print, NULL);
+				//MoveToEx(hdc, X4Print, Y4Print, NULL);//先画在内存DC中,于是舍弃
 				MoveToEx(s_hdcMem, X4Print, Y4Print, NULL);
 			}
 			if (flag4DidntDraw)
@@ -844,45 +778,39 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		LineTo(s_hdcMem, ww, wh / 2 - ymove);//x轴
 		MoveToEx(s_hdcMem, ww/2-xmove, 0,NULL);
 		LineTo(s_hdcMem, ww/2-xmove, wh);//y轴
-		//DeleteObject(SelectObject(hdc, GetStockObject(WHITE_PEN)));
 
 		/*测试方法*/
 		
+		/*已清空*/
 		/*------------------------------*/
 
 
-		//设置文本颜色以及文本背景颜色
-		SetTextColor(s_hdcMem, RGB(204, 237, 199));
-		SetBkMode(s_hdcMem, TRANSPARENT);
-		//SetBkColor(hdc, GetSysColor(COLOR_WINDOW));
-
 		/*现行办法，正确有效，效果不好*/
-		//SetBkMode(hdc,TRANSPARENT);//透明效果反而不好
 		//给x轴标上坐标点,
-		for (int n = 0; n <= ww / 120; n++)
+		for (int n = 0; n <= ww / 106; n++)
 		{
 			// (n*120-ww/2+xmove)/d   这个数代表在屏幕上x为 n*d 这个像素点  实际对应的物理真实点的 x 坐标    
 
 			//下面把数字转成字符
-			sprintf_s(BufferBuffer, "%f", (n * 120 - ww / 2 + xmove) / d);
+			sprintf_s(BufferBuffer, "%f", (n * 106 - ww / 2 + xmove) / d);
 			CharToTchar(BufferBuffer, tmpString);
 
-			TextOut(s_hdcMem, n * 120, wh / 2 - ymove + 3, tmpString, 8);//wh / 2 - ymove是 x轴的 像素纵坐标
-			MoveToEx(s_hdcMem, n * 120, wh / 2 - ymove + 5, NULL);//画出刻度
-			LineTo(s_hdcMem, n * 120, wh / 2 - ymove - 5);
+			TextOut(s_hdcMem, n * 106, wh / 2 - ymove + 3, tmpString, 8);//wh / 2 - ymove是 x轴的 像素纵坐标
+			MoveToEx(s_hdcMem, n * 106, wh / 2 - ymove + 5, NULL);//画出刻度
+			LineTo(s_hdcMem, n * 106, wh / 2 - ymove - 5);
 		}
 		//给y轴标上坐标点
-		for (int n = 0; n <= wh / 120; n++)
+		for (int n = 0; n <= wh / 106; n++)
 		{
 			// (n*120-ww/2+xmove)/d   这个数代表在屏幕上x为 n*d 这个像素点  实际对应的物理真实点的 x 坐标    
 
 			//下面把数字转成字符
-			sprintf_s(BufferBuffer, "%f", (float)(wh / 2 - ymove - n * 120) / d);
+			sprintf_s(BufferBuffer, "%f", (float)(wh / 2 - ymove - n * 106) / d);
 			CharToTchar(BufferBuffer, tmpString);
 
-			TextOut(s_hdcMem, ww / 2 - xmove + 3, n * 120, tmpString, 8);//wh / 2 - ymove是 x轴的 像素纵坐标
-			MoveToEx(s_hdcMem, ww / 2 - xmove + 5, n * 120, NULL);//画出刻度
-			LineTo(s_hdcMem, ww / 2 - xmove - 5, n * 120);
+			TextOut(s_hdcMem, ww / 2 - xmove + 3, n * 106, tmpString, 8);//wh / 2 - ymove是 x轴的 像素纵坐标
+			MoveToEx(s_hdcMem, ww / 2 - xmove + 5, n * 106, NULL);//画出刻度
+			LineTo(s_hdcMem, ww / 2 - xmove - 5, n * 106);
 		}
 
 		//唯一一次绘图到屏幕 所以不会闪烁
@@ -891,62 +819,11 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		EndPaint(hwnd, &ps);
 	}
 	computed = true;
+	flag4Drew = true;
 		break;
 	case WM_SYSCOLORCHANGE:
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
-	case WM_CREATE:
-
-		SetWindowLong(hwnd, GWL_EXSTYLE, GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
-		SetLayeredWindowAttributes(hwnd, RGB(5, 255, 255), 113, LWA_ALPHA | LWA_COLORKEY);
-		//RedrawWindow(hwnd);
-
-		//这个代码块实现位图可缩放  
-		{
-			hdc = GetDC(hwnd);
-			hdcTemp = CreateCompatibleDC(hdc);
-			SelectObject(hdcTemp, hBitmap);
-
-			// 得到窗口大小  
-			int nWidth, nHeight;
-			GetWindowSize(hwnd, &nWidth, &nHeight);
-
-			// 创建与窗口大小相等且能容纳位图的HDC - s_hdcMem  
-			s_hdcMem = CreateCompatibleDC(hdc);
-			hbmp = CreateCompatibleBitmap(hdc, nWidth, nHeight);
-			SelectObject(s_hdcMem, hbmp);
-
-			// 将原位图缩放到窗口大小  
-			GetObject(hBitmap, sizeof(bm), &bm);
-			StretchBlt(s_hdcMem, 0, 0, nWidth, nHeight, hdcTemp, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
-
-			// 释放资源  
-			DeleteDC(hdcTemp);
-			ReleaseDC(hwnd, hdc);
-
-		}
-		break;
-
-	//case WM_ERASEBKGND: //在窗口背景中直接贴图  ,这样可以设置背景,很方便
-		/*hdc = (HDC)wParam;
-		int nWidth, nHeight;
-		GetWindowSize(hwnd, &nWidth, &nHeight);
-		BitBlt(hdc, 0, 0, nWidth, nHeight, s_hdcMem, 0, 0, SRCCOPY);*/
-		//return TRUE;
-	
-		switch (wParam)
-		{
-		case VK_SPACE:
-			if (HIBYTE(GetKeyState(VK_CONTROL))){
-
-			}
-			break;
-		default:
-			break;
-		}
-	break;
-
-
 	case WM_LBUTTONDOWN: 
 		//flag4LBDown = true;
 		pt.x = LOWORD(lParam);
@@ -987,58 +864,42 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			TextOut(hdc, 0, 16, TEXT("y= "), 3);
 			TextOut(hdc, 16, 16, tcharReplacement4X, 8);
 			
-			/*//画出连接到x、y轴的辅助虚线,闪烁明显，效果不行，舍弃。
-			DeleteObject(SelectObject(hdc, CreatePen(PS_DASH, 1, RGB(239, 239, 185))));//设置虚线颜色
-			SetBkMode(hdc, TRANSPARENT);//设置虚线背景颜色为透明
-			InvalidateRect(hwnd, NULL, TRUE);
-			MoveToEx(hdc, LOWORD(lParam), HIWORD(lParam), NULL);
-			LineTo(hdc, LOWORD(lParam), wh / 2 - ymove );*/
+				SetROP2(hdc, R2_XORPEN);
+				DeleteObject(SelectObject(hdc, pen4s_hdcMem)); //pen4s_hdcMem));//设置虚线颜色
+				
+				//只有函数图像和坐标都画好以后才绘制辅助线,否则第一条辅助线会有残留
+					//竖直方向
+				if (!flag4Drew)
+				{
+					//水平方向
+					MoveToEx(hdc, formerX, formerY, NULL);
+					LineTo(hdc, formerX, wh / 2 - ymove);
+					//竖直方向
+					MoveToEx(hdc, formerX, formerY, NULL);
+					LineTo(hdc, ww / 2 - xmove, formerY);
+					flag4Drew = true;
+				}
+				if (flag4Drew)
+				{
+					MoveToEx(hdc, LOWORD(lParam), HIWORD(lParam), NULL);
+					LineTo(hdc, LOWORD(lParam), wh / 2 - ymove);
+					//水平方向
+					MoveToEx(hdc, LOWORD(lParam), HIWORD(lParam), NULL);
+					LineTo(hdc, ww / 2 - xmove, HIWORD(lParam));
+					flag4Drew = false;
+					//更新former x y
+				}
+					formerX = LOWORD(lParam);
+					formerY = HIWORD(lParam);
+				
 			ReleaseDC(hwnd, hdc);
 		}
-		
-		/*下面这种方法出现内存问题*/
-		/*else
-		{
-			float xInRealWorld = (LOWORD(lParam)-ww/2+xmove)/d;
-			
-			CopyMemory(Expression, expression, (lstrlen(expression))*sizeof(expression[0]));
 
-
-			//x取不同的实际值，用来替代表达式中的x 
-			float floatReplacement4X = xInRealWorld;
-
-			//下面把数字转成字符
-			char BufferBuffer[24];
-			sprintf_s(BufferBuffer, "%f", floatReplacement4X);
-			CharToTchar(BufferBuffer, tcharReplacement4X);
-			TCHAR tmpString[300] = { '(' };
-			lstrcat(tmpString, tcharReplacement4X);
-			lstrcat(tmpString, TEXT(")"));
-			ZeroMemory(tcharReplacement4X, 24 * sizeof(expression[0]));//先清空它再 复制数字字符给他
-			CopyMemory(tcharReplacement4X, tmpString, (lstrlen(tmpString))*sizeof(tmpString[0]));//这样tcharReplacement4X 就被括号包起来了
-			ZeroMemory(tmpString, lstrlen(tmpString)*sizeof(expression[0]));
-
-			for (int p = 9; p >= 0; p--){
-				if (PositionOfX[p] != -1)
-					ReplaceString(Expression, tcharReplacement4X, PositionOfX[p]);
-				//int a;//为了设置断点
-			}
-			expressionRepair(Expression);//x替换成数字后  再次 修复表达式中的问题  解决负数问题
-
-			trans(lstrlen(Expression), Expression);
-			compvalue();//至此，只是得到了原始的真实物理x，y坐标  分别是 ffloatReplacement4X   、  value
-
-			hdc = GetDC(hwnd);
-			TextOut(hdc, 0, 0, TEXT("x= "), 3);
-			//TextOut(hdc, 36, 0, TEXT("x= "), 3);
-			ReleaseDC(hwnd, hdc);
-		}*/
 		break;
 	}
 	case 0x020A://WM_MOUSEWHEEL
 		if ((INT)wParam > 0)
 			d *= 1.1;
-
 		else
 			d /= 1.1;
 		InvalidateRect(hwnd, NULL, TRUE);
@@ -1087,12 +948,12 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_LEFT:
+		case VK_LEFT://键盘移动函数图象
 			xmove -= 20;
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		case VK_RIGHT:
-			xmove += 10;
+			xmove += 20;
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		case VK_UP:
@@ -1107,18 +968,13 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		break;
 	case WM_DESTROY:
 		//CloseWindow(hwnd);//只是让窗口不显示  
-		//DestroyWindow(hwnd);
-		//ZeroMemory(hwnd,1);
 		//关闭窗口时，背景位图换回去
-		
 		hBitmap = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAPNewBG));//主界面画刷句柄，绘图界面共用
 		if (hBitmap == NULL)
 		{
 			MessageBox(NULL, TEXT("主界面位图加载失败"), TEXT("Error"), MB_ICONERROR);
 			return 0;
 		}
-		//HWND tmpHwnd = hwnd;
-		//hwnd = NULL;
 		DeleteObject(hBmBrush);
 		DeleteObject(pen4s_hdcMem);
 		DestroyWindow(hwnd);

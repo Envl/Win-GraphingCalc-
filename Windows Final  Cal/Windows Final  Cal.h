@@ -153,7 +153,6 @@ bool BracketCommonOperatorCheck(TCHAR* str)
 	int lBracketCounter = 0;
 	int rBracketCounter = 0;
 	int i=0;
-	//flag4BracketNotMatch = false;
 	while (str[i] != '#')
 	{
 		if (str[i] == '(')
@@ -184,27 +183,15 @@ bool expressionCheck(TCHAR* str){
 	flag4NotExistNumber = true;
 	while (str[i] != '#')
 	{
-		
-		
 		if (str[i] >= '0'&&str[i] <= '9')
 			flag4NotExistNumber = false;
-		/*if (!(str[i] <= '9'&&str[i] >= '0'))
-		{
-			if ((!(str[i +1] <= '9'&&str[i + 1] >= '0'))&&(str[i+1]!='('))
-			{
-				//printf("\n\t输入了不支持的运算!\n");
-				//system("pause");
-				//exit(0);//异常退出
-				//if (str[i+2])
-				flag4Check = false;
-				return FALSE;
-			}
-		}*///这一段被下面这个函数取代
+
 		operatorInfiniteCheck(str, i);
 		
 		if (!flag4Check)
 			return FALSE;
-		flag4Check = false;//对应的第  i  个字符是否存在于buttonText中   false代表不存在
+		/*------------------------------------------*/
+		flag4Check = false;
 		for (int j = 0; j < NUM; j ++ ){
 			if (str[i] == '!')
 				flag4Factorial = true;
@@ -241,13 +228,6 @@ bool expressionCheck4Drawing(TCHAR* str){//这是给函数绘图用的
 		for (int j = 0; j < NUM; j++){
 			if (str[i] == *buttonText[j]){
 				flag4Check = true;
-				
-				/*if (str[i] == 'y' || str[i] == 'x')
-					if (str[i + 1] >= '0'&&str[i + 1] <= '9'){
-					flag4Check = false;
-					return FALSE;
-					}*/
-
 				return TRUE;
 			}
 		}
@@ -292,29 +272,13 @@ void ReplaceString(TCHAR* destination,TCHAR*  insertion,int position){
 			ZeroMemory(tmpTail, lstrlen(tmpTail));
 }
 	
-/*----------------------------------------Yaoooooooooooooo---------------------------------------------------------------------------------*/
 /*将算术表达式转化为后缀表达式*/
 void trans(int length,TCHAR* str)
 {
-	//TCHAR str[max];/*存储原算术表达式*/
 	char stack[max1]={0};/*作为栈使用*/
 	char ch;
 	int sum, i,  t, top = 0;
 	i = length;
-	/*
-	do{
-		i++;
-		//cin>>str[i];/*此步我用的是C++C语言的话在后面之所以用这个有一点区别都
-		scanf_s("%c", &str[i]);
-		if (str[i] == '-'&&!(str[i - 1] <= '9'&&str[i - 1] >= '0')){
-
-
-			str[i++] = '0';
-			str[i] = '-';
-
-
-		}
-	} while (str[i] != '#'&&i != max);*/
 	sum = i;
 	t = 1; i = 0;
 	ch = str[i]; i++;
@@ -427,13 +391,7 @@ void trans(int length,TCHAR* str)
 		t++; top--;
 	}
 	ex[t] = ' ';
-	/*printf("\n\t原来表达式：");
-	for (j = 1; j<sum; j++)
-		printf("%c", str[j]);
-	printf("\n\t逆波兰式：", ex);
-	for (j = 1; j<t; j++)
-		printf("%c", ex[j]);
-		*/
+	
 }
 
 /*计算后缀表达式的值*/
