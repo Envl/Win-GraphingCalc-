@@ -5,49 +5,40 @@
 
 #include "stdafx.h"
 #include "resource.h"
-
-
 #define MAX_LOADSTRING 100
 #define Point_Sum 3000
 
-
-
 // 全局变量: 
+HBITMAP  hBitmap;//主界面位图句柄
 HINSTANCE hInst;								// 当前实例
+HWND hStaticText;//计算器的 显示器
+HWND hwnd4Drawing[10];//用来绘图的子窗口的句柄。 最高支持10个
 TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
 TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
 TCHAR value[24] = { '0' };  //用来存储计算结果
+TCHAR Expression[257] = { 0 };//i每变化一次 即每循环一次 把原版未作改变的expression 复制给它
+TCHAR tcharReplacement4X[24] = { 0 };//定义并申请输入缓冲区空间
+TCHAR expression[512] = { '0#' };//存储表达式中内容
+TCHAR expression4Display[512] = { '0' };//存储用于显示的表达式
+
 double result=0;//用来存储计算结果的数值
 int xmove = 0;//鼠标拖动的x，y方向移动的值
 int ymove = 0;
- int ww =0;//窗口宽度
- int PositionOfX[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };//表达式中有x的位置
- TCHAR tcharReplacement4X[24] = { 0 };//定义并申请输入缓冲区空间
- TCHAR Expression[257] = { 0 };//i每变化一次 即每循环一次 把原版未作改变的expression 复制给它
-
-
- bool isTheFistTime = true;//判断是否开始新的绘图  以决定是否invalidateRect
-
+int ww =0;//窗口宽度
+int PositionOfX[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };//表达式中有x的位置
 int cxChar;
 int cyChar;
-HWND hStaticText;//计算器的 显示器
-HWND hwnd4Drawing[10] ;//用来绘图的子窗口的句柄。 最高支持10个
-bool flag4Check=true;
-bool flag4DidntDraw = false;
 int Command;//全局保存 nCmdShow
+
+bool flag4Check=true;
+bool isTheFistTime = true;//判断是否开始新的绘图  以决定是否invalidateRect
+bool flag4DidntDraw = false;
 bool flag4NotDraw = true;//x值不能取的时候不绘图
 bool flag4Drawing = false;//代表正在绘图
 
-//TCHAR tmpButtonText;//暂存从按钮中获得的文本
-TCHAR expression[512] = {'0#'};//存储表达式中内容
-TCHAR expression4Display[512] = {'0'};//存储用于显示的表达式
 LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
-	WPARAM wParam, LPARAM lParam);
-
-HBITMAP  hBitmap;//主界面位图句柄
-//未使用  HBITMAP hBitmapDraw;//绘图界面位图句柄
-
-#include "Windows Final  Cal.h"
+									WPARAM wParam, LPARAM lParam);
+#include "Windows Final  Cal.h"//其中包含的内容需要存在于这个回调函数后
 
 
 HWND hwndButton[NUM];//每个按钮的句柄
@@ -143,7 +134,6 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hbrBackground =(HBRUSH)GetStockObject(NULL_BRUSH);
 		//(HBRUSH)CreatePatternBrush(hBitmap); //这是另一种方案
 	wcex.lpszMenuName = NULL;
-//MAKEINTRESOURCE(IDC_WINDOWSFINALCAL);
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm =  LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON1));
 
@@ -168,8 +158,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	int nWindowWidth = bm.bmWidth-233 ;//
 	int nWindowHeight = bm.bmHeight; //在BMP图片原来尺寸基础上调整窗口宽高  
    HWND hWnd;
-  // cxChar = LOWORD(GetDialogBaseUnits());//cxChar=8 
-   //cyChar = LOWORD(GetDialogBaseUnits());
    //绝对定义cxChar cyChar的值 防止系统不同显示效果不可控
    cxChar = 8;
    cyChar = 8;

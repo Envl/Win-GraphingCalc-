@@ -16,6 +16,7 @@ char ex[max1];/*存储后缀表达式*/
  bool flag4BracketNotMatch = false;//左右括号不匹配flag   不匹配就是true
 	/*----------------------------------------Yaoooooooooooooo---------------------------------------------------------------------------------*/
  int test4GitHub = 9;
+
 TCHAR*  buttonText[] = {
 	TEXT("关"), TEXT("C"), TEXT("←"), TEXT("÷"),//0--4号按钮
 	TEXT("7"), TEXT("8"), TEXT("9"), TEXT("x"),
