@@ -6,16 +6,53 @@
 #include<math.h>
 #include<string.h>
 #define max1 200
-using namespace std;
+#define Point_Sum 3000
+#define MAX_LOADSTRING 100
+
+//using namespace std;
+// 全局变量: 
+HBITMAP  hBitmap;//主界面位图句柄
+HINSTANCE hInst;								// 当前实例
+HWND hStaticText;//计算器的 显示器
+HWND hwnd4Drawing[10];//用来绘图的子窗口的句柄。 最高支持10个
+TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
+TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
+TCHAR value[24] = { '0' };  //用来存储计算结果
+TCHAR Expression[257] = { 0 };//i每变化一次 即每循环一次 把原版未作改变的expression 复制给它
+TCHAR tcharReplacement4X[24] = { 0 };//定义并申请输入缓冲区空间
+TCHAR expression[512] = { '0#' };//存储表达式中内容
+TCHAR expression4Display[512] = { '0' };//存储用于显示的表达式
+
+double result = 0;//用来存储计算结果的数值
+int xmove = 0;//鼠标拖动的x，y方向移动的值
+int ymove = 0;
+int ww = 0;//窗口宽度
+int PositionOfX[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };//表达式中有x的位置
+int cxChar;
+int cyChar;
+int Command;//全局保存 nCmdShow
+
+bool flag4Check = true;
+bool isTheFistTime = true;//判断是否开始新的绘图  以决定是否invalidateRect
+bool flag4DidntDraw = false;
+bool flag4NotDraw = true;//x值不能取的时候不绘图
+bool flag4Drawing = false;//代表正在绘图
 char ex[max1];/*存储后缀表达式*/
- bool computed = true;//标志 是否已经计算过表达式
- bool flag4TAN = false;//tan函数
- bool flag4Factorial = false;//表达式里面是否有 阶乘，若有，则不支持绘图
- bool flag4NotExistNumber;//表达式中没有数字
- bool flag4Alert;//如果不在值域内，不能除以0等等 此时flag就等于true
- bool flag4BracketNotMatch = false;//左右括号不匹配flag   不匹配就是true
+bool computed = true;//标志 是否已经计算过表达式
+bool flag4TAN = false;//tan函数
+bool flag4Factorial = false;//表达式里面是否有 阶乘，若有，则不支持绘图
+bool flag4NotExistNumber;//表达式中没有数字
+bool flag4Alert;//如果不在值域内，不能除以0等等 此时flag就等于true
+bool flag4BracketNotMatch = false;//左右括号不匹配flag   不匹配就是true
+
+// 此代码模块中包含的函数的前向声明: 
+ATOM				MyRegisterClass(HINSTANCE hInstance);
+BOOL				InitInstance(HINSTANCE, int);
+LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK Wnd4DrawingProc(HWND, UINT, WPARAM, LPARAM);
+void GetWindowSize(HWND hwnd, int *pnWidth, int *pnHeight);
 	/*----------------------------------------Yaoooooooooooooo---------------------------------------------------------------------------------*/
- int test4GitHub = 9;
 
 TCHAR*  buttonText[] = {
 	TEXT("关"), TEXT("C"), TEXT("←"), TEXT("÷"),//0--4号按钮
@@ -29,10 +66,9 @@ TCHAR*  buttonText[] = {
 	TEXT("x"), TEXT("y"), TEXT("="), TEXT("!"),//32--->35号按钮
 	TEXT("画图"),
 	TEXT("g"), TEXT("G"), TEXT("e"), TEXT("n")//这些不是按钮，是用来给checkExpression比对表达式是否正确的
-
 };
-TCHAR;
 #define NUM (sizeof buttonText / sizeof buttonText[0])
+HWND hwndButton[NUM];//每个按钮的句柄
 
 //检测各种省略乘号 情况    以及在负数前加个0
 void expressionRepair(TCHAR* str){
@@ -64,7 +100,6 @@ void expressionRepair(TCHAR* str){
 			//通过操作内存 插入一个东西在  第i个 位置
 			//这里是插入0在负号前面实现负数的运算
 			ZeroMemory(tmpTail, lstrlen(tmpTail)*sizeof(tmpTail[0]));
-
 			moveLen = lstrlen(str + i);
 			MoveMemory(tmpTail, str + i, moveLen*sizeof(str[0]));
 			str[i] = '0';
@@ -93,7 +128,6 @@ void expressionRepair(TCHAR* str){
 			MoveMemory(str + i + 1, tmpTail, moveLen*sizeof(str[0]));
 			//	int a = 1;//为了设置断点用的
 		}
-
 		i++;
 	}
 }
@@ -121,7 +155,6 @@ void CreateNewChildWindow(HWND hWND, HWND* h4ChildWND){
 
 			h4ChildWND[i] = CreateWindow(szWindowClass, DrawWndTitle, WS_OVERLAPPEDWINDOW,
 				CW_USEDEFAULT, CW_USEDEFAULT,700,500, NULL, NULL, hInst, NULL);
-			
 
 			ShowWindow(h4ChildWND[i], Command);
 			RECT tmpRect;
@@ -176,6 +209,7 @@ bool BracketCommonOperatorCheck(TCHAR* str)
 	}
 	return flag4Check;
 }
+
 //检查表达式是否有问题    V1---其中的字符是否有问题
 //这是给普通计算用的
 bool expressionCheck(TCHAR* str){
@@ -201,8 +235,6 @@ bool expressionCheck(TCHAR* str){
 				return TRUE;
 			}
 		}
-
-	
 		if (flag4NotExistNumber)
 		{
 			flag4Check = false;
@@ -213,19 +245,16 @@ bool expressionCheck(TCHAR* str){
 		i++;
 	}
 
-	
-	
 	return flag4Check;
-
 }
 
 
 bool expressionCheck4Drawing(TCHAR* str){//这是给函数绘图用的
 	int i = 0;
 	while (str[i] != '#'){
+		//对应的第  i  个字符是否存在于buttonText中   false代表不存在
+		flag4Check = false;
 
-		flag4Check = false;//对应的第  i  个字符是否存在于buttonText中   false代表不存在
-		
 		for (int j = 0; j < NUM; j++){
 			if (str[i] == *buttonText[j]){
 				flag4Check = true;
@@ -237,8 +266,8 @@ bool expressionCheck4Drawing(TCHAR* str){//这是给函数绘图用的
 		}
 		i++;
 	}
-	return flag4Check;
 
+	return flag4Check;
 }
 
 //获取窗口大小信息

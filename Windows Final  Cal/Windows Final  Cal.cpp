@@ -5,53 +5,8 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#define MAX_LOADSTRING 100
-#define Point_Sum 3000
-
-// 全局变量: 
-HBITMAP  hBitmap;//主界面位图句柄
-HINSTANCE hInst;								// 当前实例
-HWND hStaticText;//计算器的 显示器
-HWND hwnd4Drawing[10];//用来绘图的子窗口的句柄。 最高支持10个
-TCHAR szTitle[MAX_LOADSTRING];					// 标题栏文本
-TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
-TCHAR value[24] = { '0' };  //用来存储计算结果
-TCHAR Expression[257] = { 0 };//i每变化一次 即每循环一次 把原版未作改变的expression 复制给它
-TCHAR tcharReplacement4X[24] = { 0 };//定义并申请输入缓冲区空间
-TCHAR expression[512] = { '0#' };//存储表达式中内容
-TCHAR expression4Display[512] = { '0' };//存储用于显示的表达式
-
-double result=0;//用来存储计算结果的数值
-int xmove = 0;//鼠标拖动的x，y方向移动的值
-int ymove = 0;
-int ww =0;//窗口宽度
-int PositionOfX[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };//表达式中有x的位置
-int cxChar;
-int cyChar;
-int Command;//全局保存 nCmdShow
-
-bool flag4Check=true;
-bool isTheFistTime = true;//判断是否开始新的绘图  以决定是否invalidateRect
-bool flag4DidntDraw = false;
-bool flag4NotDraw = true;//x值不能取的时候不绘图
-bool flag4Drawing = false;//代表正在绘图
-
-LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
-									WPARAM wParam, LPARAM lParam);
-#include "Windows Final  Cal.h"//其中包含的内容需要存在于这个回调函数后
-
-
-HWND hwndButton[NUM];//每个按钮的句柄
-
-
-
-
-// 此代码模块中包含的函数的前向声明: 
-ATOM				MyRegisterClass(HINSTANCE hInstance);
-BOOL				InitInstance(HINSTANCE, int);
-LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
-void GetWindowSize(HWND hwnd, int *pnWidth, int *pnHeight);
+#include "Windows Final  Cal.h"//其中包含的内容需要存在于回调函数后
+//全局变量和函数前向声明都放入了头文件
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -61,8 +16,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-
-
  	// TODO:  在此放置代码。
 	hBitmap = (HBITMAP)LoadBitmap(hInstance, MAKEINTRESOURCE(IDB_BITMAPNewBG));//主界面画刷句柄
 	if (hBitmap == NULL)
@@ -71,19 +24,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 		return 0;
 	}
 	
-	/*----------------------------未使用  --------------------------*/
-	/*hBitmapDraw = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAPBG));//绘图界面画刷句柄
-	if (hBitmapDraw == NULL)
-	{
-		MessageBox(NULL, TEXT("绘图界面位图加载失败"), TEXT("Error"), MB_ICONERROR);
-		return 0;
-	}*/
-
-
-
 	MSG msg;
 	HACCEL hAccelTable;
-
 	
 	// 初始化全局字符串
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -110,7 +52,6 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	return (int) msg.wParam;
 }
-
 
 
 //
@@ -186,7 +127,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		   hwndButton[20 + 4 * i - 4 + j - 1] = CreateWindow(TEXT("button"), buttonText[20 + 4 * i - 4 + j - 1],
 			   WS_CHILD | WS_VISIBLE | BS_PUSHBOX|BS_FLAT|BS_BOTTOM, j  * 6 * cxChar, cyChar*(1 + 6 * i)+70,
 			   5 * cxChar, 5 * cyChar, hWnd, (HMENU)(20 + 4 * i - 4 + j), hInst, NULL);
-
 	   }
    }
    //画图按钮
@@ -247,21 +187,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			hbmp = CreateCompatibleBitmap(hdc, nWidth, nHeight);
 			SelectObject(s_hdcMem, hbmp);
 
-			// 将原位图缩放到窗口大小  
+			// 将原位图缩放
 			GetObject(hBitmap, sizeof(bm), &bm);
 			StretchBlt(s_hdcMem, 0, 0, nWidth, nHeight, hdcTemp, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
 
 			// 释放资源  
 			DeleteDC(hdcTemp);
 			ReleaseDC(hWnd, hdc);
-			PostMessage(hWnd, WM_SYSKEYDOWN, VK_CAPITAL, 0);
-			PostMessage(hWnd, WM_SYSKEYUP, VK_CAPITAL, 0);
-			
-			//PostMessage(hWnd, WM_SYSKEYDOWN, 0x41, 1 << 29);
-			
 		}
-		
 		break;
+
 	case WM_LBUTTONDOWN: //当鼠标左键点击时可以拖曳窗口  
 		SendMessage(hWnd, WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 		break;
@@ -321,12 +256,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			break;
 		case 4:
-		
 				lstrcat(expression, TEXT("/"));
 				lstrcat(expression4Display, TEXT("/"));
-			
-			SetWindowText(hStaticText, expression4Display);
-			
+				SetWindowText(hStaticText, expression4Display);
 			break;
 		case 8:
 			lstrcat(expression, TEXT("*"));
@@ -856,19 +788,20 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 				DeleteObject(SelectObject(hdc, pen4s_hdcMem)); //pen4s_hdcMem));//设置虚线颜色
 				
 				//只有函数图像和坐标都画好以后才绘制辅助线,否则第一条辅助线会有残留
-					//竖直方向
+				/*下面逻辑实现了绘制辅助线,并且擦出之前绘制的辅助线*/
 				if (!flag4Drew)
 				{
-					//水平方向
+					//竖直方向
 					MoveToEx(hdc, formerX, formerY, NULL);
 					LineTo(hdc, formerX, wh / 2 - ymove);
-					//竖直方向
+					//水平方向
 					MoveToEx(hdc, formerX, formerY, NULL);
 					LineTo(hdc, ww / 2 - xmove, formerY);
 					flag4Drew = true;
 				}
 				if (flag4Drew)
 				{
+					//竖直方向
 					MoveToEx(hdc, LOWORD(lParam), HIWORD(lParam), NULL);
 					LineTo(hdc, LOWORD(lParam), wh / 2 - ymove);
 					//水平方向
@@ -886,6 +819,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		break;
 	}
 	case 0x020A://WM_MOUSEWHEEL
+		//实现鼠标滚轮缩放大小
 		if ((INT)wParam > 0)
 			d *= 1.1;
 		else
@@ -913,11 +847,9 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 				}
 				break;
 			}
-			
 			case '-':
 				d /= 1.2;
 				InvalidateRect(hwnd, &wndRect, true);//无效化客 户区 促使产生  WM_PAINT
-
 				break;
 			case '+':case '=':
 				d *= 1.2;
