@@ -157,7 +157,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
-	PAINTSTRUCT ps;
 	HDC hdc;
 	static HDC s_hdcMem; //放置缩放后的位图  
 	HBITMAP hbmp;
@@ -555,19 +554,19 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 	ww = wndRect.right - wndRect.left;//窗口宽度
 	wh = wndRect.bottom - wndRect.top;//窗口高度
 	
-	static float d = 53;//x值域   初始为[-ww*2/53，ww*2/53]  ,53在我的电脑上是一厘米的像素个数  1600 X 900 分辨率 13.3英寸
+	static double d = 53;//x值域   初始为[-ww*2/53，ww*2/53]  ,53在我的电脑上是一厘米的像素个数  1600 X 900 分辨率 13.3英寸
 	static POINT pt = { 0, 0 };//存放之前鼠标所在点
 	static HDC s_hdcMem; //放置缩放后的位图  
 	static HPEN pen4s_hdcMem;
 
 	HBITMAP hbmp;
 
-	static float floatReplacement4X;//画图时用来替换每一个'x'字符为数字字符
+	static double doubleReplacement4X;//画图时用来替换每一个'x'字符为数字字符
 	static char BufferBuffer[24];//char转TCHAR用来中转的 由于sprintf_s不支持转成TCHAR
 	static TCHAR tmpString[300] = { 0 };
 	static HBRUSH hBmBrush;
 	static int position4EachX;//画图时用来 计数x有几个
-	static int Y4Print, X4Print, CenterWindowPixelY, CenterWindowPixelX;//画图要用的坐标
+	static int Y4Print, X4Print, CenterWindowPixelY, CenterWindowPixelX;//画图要用的屏幕坐标
 	static int formerX=0, formerY=0;//用来保存之前的x y
 	static RECT rect4DashLine;//用来清空之前画的虚线;
 	static bool flag4Drew=false;//是否画完了图像
@@ -638,12 +637,12 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			CopyMemory(Expression, expression, (lstrlen(expression))*sizeof(expression[0]));
 			
 			//x取不同的实际值，用来替代表达式中的x 
-			floatReplacement4X = (float)(i - Point_Sum / 2 + xmove)/d;//这就是真正的物理x值   单位是厘米 
+			doubleReplacement4X = (double)(i - Point_Sum / 2 + xmove)/d;//这就是真正的物理x值   单位是厘米 
 
 			//下面把数字转成字符
 			ZeroMemory(tmpString, lstrlen(tmpString)*sizeof(tmpString[0]));//这句是必须的
 			tmpString[0] = '(';
-			sprintf_s(BufferBuffer, "%f", floatReplacement4X);
+			sprintf_s(BufferBuffer, "%f", doubleReplacement4X);
 
 			CharToTchar(BufferBuffer, tcharReplacement4X);
 			lstrcat(tmpString, tcharReplacement4X);
@@ -664,9 +663,9 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			/*下面开始绘图！！！！ 好！！*/
 			
 			//以窗口中心为原点的x 、y像素坐标
-			 CenterWindowPixelX =(floatReplacement4X*d-xmove);		//这个是真的x坐标
+			 CenterWindowPixelX =(int)(doubleReplacement4X*d-xmove);		//这个是真的x坐标
 				//i*ww / Point_Sum - Point_Sum / 2; //这个是不变的x坐标，只由窗口宽度决定  现已舍弃
-			 CenterWindowPixelY = result*d;
+			 CenterWindowPixelY = (int)(result*d);
 
 			 X4Print = CenterWindowPixelX + ww / 2;//左上角为原点的 屏幕 x、y像素坐标
 			 Y4Print =wh/2- CenterWindowPixelY-ymove;//y轴方向的拖动  由ymove体现出来 --------------------------------------------
@@ -728,7 +727,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			// (n*120-ww/2+xmove)/d   这个数代表在屏幕上x为 n*d 这个像素点  实际对应的物理真实点的 x 坐标    
 
 			//下面把数字转成字符
-			sprintf_s(BufferBuffer, "%f", (float)(wh / 2 - ymove - n * 106) / d);
+			sprintf_s(BufferBuffer, "%f", (double)(wh / 2 - ymove - n * 106) / d);
 			CharToTchar(BufferBuffer, tmpString);
 
 			TextOut(s_hdcMem, ww / 2 - xmove + 3, n * 106, tmpString, 8);//wh / 2 - ymove是 x轴的 像素纵坐标
@@ -766,8 +765,8 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		{
 			//输出鼠标所指位置的 真实 物理坐标
 			char BufferBuffer[24];
-			float xInRealWorld = (LOWORD(lParam) - ww / 2 + xmove) / d;//真实 物理世界 的 x、y
-			float yInRealWorld =-( (HIWORD(lParam) - wh / 2 + ymove) / d);
+			double xInRealWorld = (LOWORD(lParam) - ww / 2 + xmove) / d;//真实 物理世界 的 x、y
+			double yInRealWorld =-( (HIWORD(lParam) - wh / 2 + ymove) / d);
 			sprintf_s(BufferBuffer, "%f", xInRealWorld);
 			CharToTchar(BufferBuffer, tcharReplacement4X);
 			hdc = GetDC(hwnd);
@@ -783,7 +782,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			TextOut(hdc, 0, 16, TEXT("y= "), 3);
 			TextOut(hdc, 16, 16, tcharReplacement4X, 8);
 			
-				SetROP2(hdc, R2_XORPEN);
+				SetROP2(hdc, R2_XORPEN);//设置反转模式
 				DeleteObject(SelectObject(hdc, pen4s_hdcMem)); //pen4s_hdcMem));//设置虚线颜色
 				
 				//只有函数图像和坐标都画好以后才绘制辅助线,否则第一条辅助线会有残留
@@ -820,7 +819,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 	case 0x020A://WM_MOUSEWHEEL
 		//实现鼠标滚轮缩放大小
 		if ((INT)wParam > 0)
-			d *= 1.03;
+			d *=1.03;
 		else
 			d /= 1.03;
 		InvalidateRect(hwnd, NULL, TRUE);

@@ -29,12 +29,12 @@ int ymove = 0;
 int ww = 0;//窗口宽度
 int wh = 0;//窗口宽度
 int PositionOfX[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };//表达式中有x的位置
-int cxChar;
+int cxChar;//每个字符的平均宽高,但后来使用了定值
 int cyChar;
 int Command;//全局保存 nCmdShow
 char ex[max1];/*存储后缀表达式*/
 
-bool flag4Check = true;
+bool flag4Check = true;//表达式检测是否通过
 bool isTheFistTime = true;//判断是否开始新的绘图  以决定是否invalidateRect
 bool flag4DidntDraw = false;
 bool flag4NotDraw = true;//x值不能取的时候不绘图
@@ -553,7 +553,7 @@ void compvalue()
 				flag4NotDraw = true;
 				//exit(1);/*异常退出*/
 			}
-			float sum = 1;
+			double sum = 1;
 			for (int i = 0; i < stack[top]; i++)
 			{
 				sum = sum * (stack[top] - i);
@@ -592,14 +592,14 @@ void compvalue()
 	TCHAR szBuffer[64];//定义并申请输入缓冲区空间
 	char BufferBuffer[64];
 	if (top >= 0)
-		if (stack[top] == -9.2559631349317831e+061)
+		if (stack[top] == -9.2559631349317831e+061)//处理数值越界
 	{
 		if (top >= 0)
 			stack[top] = 0;
 		result = 0;
 		computed = true;
 	}
-	sprintf_s(BufferBuffer, "%.9lf", stack[top]);//小数点后14位是极限,否则就会有9-0.332=8.667999999的问题了.  高精度算法暂时不搞
+	sprintf_s(BufferBuffer, "%.16lf", stack[top]);//小数点后14位是极限,否则就会有9-0.332=8.667999999的问题了.  高精度算法暂时不搞
 	CharToTchar(BufferBuffer, szBuffer);
 	if (szBuffer[2] == '.'&&szBuffer[3] == '#')//这 有待处理 这是数值越界的情况
 		flag4NotDraw = true;
