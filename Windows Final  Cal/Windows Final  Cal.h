@@ -10,6 +10,7 @@
 #define MAX_LOADSTRING 100
 
 // 全局变量: 
+int availableAmount;
 HBITMAP  hBitmap;//主界面位图句柄
 HINSTANCE hInst;								// 当前实例
 HWND hStaticText;//计算器的 显示器
@@ -181,7 +182,7 @@ void operatorInfiniteCheck(TCHAR* str,int i)
 }
 
 //检测括号是否匹配
-//是否有无论如何都不准连续的两个运算符
+//是否有无论如何都  不准连续  的两个运算符
 bool BracketCommonOperatorCheck(TCHAR* str)
 {
 	int lBracketCounter = 0;
@@ -582,14 +583,6 @@ void compvalue()
 		t++;
 	}
 
-	//舍弃
-	/*if (flag4TAN)//如果是画tan的图的话
-		if (abs(abs(result) -abs(stack[top])) >= wh/53)  //两个值差距太大就不绘图
-		{
-		//flag4NotDraw = true;
-		flag4TAN = false;
-		}*/
-
 	if (top >= 0)
 		result = stack[top];
 	
@@ -606,23 +599,30 @@ void compvalue()
 		result = 0;
 		computed = true;
 	}
-	sprintf_s(BufferBuffer, "%.14lf", stack[top]);//小数点后14位是极限,否则就会有9-0.332=8.667999999的问题了.  高精度算法暂时不搞
+	sprintf_s(BufferBuffer, "%.9lf", stack[top]);//小数点后14位是极限,否则就会有9-0.332=8.667999999的问题了.  高精度算法暂时不搞
 	CharToTchar(BufferBuffer, szBuffer);
-	if (szBuffer[2] == '.'&&szBuffer[3] == '#')//这 有待处理
+	if (szBuffer[2] == '.'&&szBuffer[3] == '#')//这 有待处理 这是数值越界的情况
 		flag4NotDraw = true;
 	if (value[0] != '\0'&&expression[0]!='\0')
 	{
 		ZeroMemory(value, lstrlen(value)*sizeof(value[0]));
 	}
-	int availableAmount;//有效数字的位数
-	if (result!=0)//因为结果是0 的话,有效数字位数检测出来就是0了.这样就不会显示结果了
-		for (availableAmount = lstrlen(szBuffer); availableAmount > 0; availableAmount--)
-		{
-		if (szBuffer[availableAmount - 1] != '0'&&szBuffer[availableAmount - 1] != '.')
-			break;
-		}
-	else availableAmount = 1;//当result为0 的时候,不检测,直接把有效数字设置成一位
-	//int num = lstrlen(szBuffer) - availableAmount;
+
+	availableAmount=lstrlen(szBuffer);//有效数字的位数
+	//if ((int)result-result!=0)//只有结果不是整数时才处理,否则会误把整数的零忽略掉
+	{
+		if (result != 0)//因为结果是0 的话,有效数字位数检测出来就是0了.这样就不会显示结果了
+			for (availableAmount = lstrlen(szBuffer); availableAmount >0; availableAmount--)
+			{
+			if (szBuffer[availableAmount - 1] != '0')
+				break;
+			}
+		else availableAmount = 1;//当result为0 的时候,不检测,直接把有效数字设置成一位
+	}
+	if (szBuffer[availableAmount - 1] == '.')//去除后面没有跟数字的 '.' 如果不这样做,99-9就会输出  "90." 
+		availableAmount--;
+
+	//最终结果复制给value
 	MoveMemory(value, szBuffer, availableAmount*sizeof(szBuffer[0]));
 	//int a;//为了设置断点
 }
