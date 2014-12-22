@@ -599,7 +599,7 @@ void compvalue()
 		result = 0;
 		computed = true;
 	}
-	sprintf_s(BufferBuffer, "%.16lf", stack[top]);//小数点后14位是极限,否则就会有9-0.332=8.667999999的问题了.  高精度算法暂时不搞
+	sprintf_s(BufferBuffer, "%.14lf", stack[top]);//小数点后14位是极限,否则就会有9-0.332=8.667999999的问题了.  高精度算法暂时不搞
 	CharToTchar(BufferBuffer, szBuffer);
 	if (szBuffer[2] == '.'&&szBuffer[3] == '#')//这 有待处理 这是数值越界的情况
 		flag4NotDraw = true;

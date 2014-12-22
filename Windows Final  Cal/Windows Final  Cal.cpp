@@ -642,7 +642,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			//下面把数字转成字符
 			ZeroMemory(tmpString, lstrlen(tmpString)*sizeof(tmpString[0]));//这句是必须的
 			tmpString[0] = '(';
-			sprintf_s(BufferBuffer, "%f", doubleReplacement4X);
+			sprintf_s(BufferBuffer, "%lf", doubleReplacement4X);
 
 			CharToTchar(BufferBuffer, tcharReplacement4X);
 			lstrcat(tmpString, tcharReplacement4X);
@@ -714,7 +714,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			// (n*120-ww/2+xmove)/d   这个数代表在屏幕上x为 n*d 这个像素点  实际对应的物理真实点的 x 坐标    
 
 			//下面把数字转成字符
-			sprintf_s(BufferBuffer, "%f", (n * 106 - ww / 2 + xmove) / d);
+			sprintf_s(BufferBuffer, "%lf", (n * 106 - ww / 2 + xmove) / d);
 			CharToTchar(BufferBuffer, tmpString);
 
 			TextOut(s_hdcMem, n * 106, wh / 2 - ymove + 3, tmpString, 8);//wh / 2 - ymove是 x轴的 像素纵坐标
@@ -727,7 +727,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			// (n*120-ww/2+xmove)/d   这个数代表在屏幕上x为 n*d 这个像素点  实际对应的物理真实点的 x 坐标    
 
 			//下面把数字转成字符
-			sprintf_s(BufferBuffer, "%f", (double)(wh / 2 - ymove - n * 106) / d);
+			sprintf_s(BufferBuffer, "%lf", (double)(wh / 2 - ymove - n * 106) / d);
 			CharToTchar(BufferBuffer, tmpString);
 
 			TextOut(s_hdcMem, ww / 2 - xmove + 3, n * 106, tmpString, 8);//wh / 2 - ymove是 x轴的 像素纵坐标
@@ -767,7 +767,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			char BufferBuffer[24];
 			double xInRealWorld = (LOWORD(lParam) - ww / 2 + xmove) / d;//真实 物理世界 的 x、y
 			double yInRealWorld =-( (HIWORD(lParam) - wh / 2 + ymove) / d);
-			sprintf_s(BufferBuffer, "%f", xInRealWorld);
+			sprintf_s(BufferBuffer, "%lf", xInRealWorld);
 			CharToTchar(BufferBuffer, tcharReplacement4X);
 			hdc = GetDC(hwnd);
 			
@@ -777,7 +777,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			TextOut(hdc, 0, 0, TEXT("x= "), 3);
 			TextOut(hdc, 16, 0, tcharReplacement4X, 8);
 			/*以上输出鼠标所指真实物理 x坐标 ，以下输出y坐标*/
-			sprintf_s(BufferBuffer, "%f", yInRealWorld);
+			sprintf_s(BufferBuffer, "%lf", yInRealWorld);
 			CharToTchar(BufferBuffer, tcharReplacement4X);
 			TextOut(hdc, 0, 16, TEXT("y= "), 3);
 			TextOut(hdc, 16, 16, tcharReplacement4X, 8);
