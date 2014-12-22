@@ -372,7 +372,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			
 			break;
 		case 37://画函数图象
-			flag4Drawing = true;//此时在绘图
+			flag4Drawing = true;//标识 此时正在绘图
 			if (!computed)
 			lstrcat(expression, TEXT("#"));
 			if (expression[0] == 'y')
@@ -553,7 +553,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 	RECT wndRect=RECT();
 	GetClientRect(hwnd, &wndRect);
 	ww = wndRect.right - wndRect.left;//窗口宽度
-	int wh = wndRect.bottom - wndRect.top;//窗口高度
+	wh = wndRect.bottom - wndRect.top;//窗口高度
 	
 	static float d = 53;//x值域   初始为[-ww*2/53，ww*2/53]  ,53在我的电脑上是一厘米的像素个数  1600 X 900 分辨率 13.3英寸
 	static POINT pt = { 0, 0 };//存放之前鼠标所在点
@@ -644,6 +644,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 			ZeroMemory(tmpString, lstrlen(tmpString)*sizeof(tmpString[0]));//这句是必须的
 			tmpString[0] = '(';
 			sprintf_s(BufferBuffer, "%f", floatReplacement4X);
+
 			CharToTchar(BufferBuffer, tcharReplacement4X);
 			lstrcat(tmpString, tcharReplacement4X);
 			lstrcat(tmpString, TEXT(")"));
@@ -705,6 +706,8 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		/*------------------------------*/
 
 
+		//显示单位
+		TextOut(s_hdcMem, 0, 4 * cyChar, TEXT("单 位: cm"),7);
 		/*现行办法，正确有效，效果不好*/
 		//给x轴标上坐标点,
 		for (int n = 0; n <= ww / 106; n++)
@@ -745,13 +748,9 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	case WM_LBUTTONDOWN: 
-		//flag4LBDown = true;
 		pt.x = LOWORD(lParam);
 		pt.y = HIWORD(lParam);
 		break;
-	//case WM_LBUTTONUP:
-		//flag4LBDown = false;//wParam & MK_LBUTTON  这个就能代表鼠标左键按下
-		//break;
 	case WM_MOUSEMOVE:
 	{
 		if ((wParam & MK_LBUTTON))
@@ -821,9 +820,9 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 	case 0x020A://WM_MOUSEWHEEL
 		//实现鼠标滚轮缩放大小
 		if ((INT)wParam > 0)
-			d *= 1.1;
+			d *= 1.03;
 		else
-			d /= 1.1;
+			d /= 1.03;
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	case WM_CHAR:
@@ -848,11 +847,11 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 				break;
 			}
 			case '-':
-				d /= 1.2;
+				d /= 1.05;
 				InvalidateRect(hwnd, &wndRect, true);//无效化客 户区 促使产生  WM_PAINT
 				break;
 			case '+':case '=':
-				d *= 1.2;
+				d *= 1.05;
 				InvalidateRect(hwnd, &wndRect, true);//无效化客户区 促使产生  WM_PAINT
 				break;
 			case 'z':case 'c':
@@ -887,7 +886,7 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 		}
 		break;
 	case WM_DESTROY:
-		//CloseWindow(hwnd);//只是让窗口不显示  
+		//CloseWindow(hwnd);//只是让窗口不显示  所以得用destroywindow
 		//关闭窗口时，背景位图换回去
 		hBitmap = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAPNewBG));//主界面画刷句柄，绘图界面共用
 		if (hBitmap == NULL)

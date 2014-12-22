@@ -9,7 +9,6 @@
 #define Point_Sum 3000
 #define MAX_LOADSTRING 100
 
-//using namespace std;
 // 全局变量: 
 HBITMAP  hBitmap;//主界面位图句柄
 HINSTANCE hInst;								// 当前实例
@@ -27,17 +26,18 @@ double result = 0;//用来存储计算结果的数值
 int xmove = 0;//鼠标拖动的x，y方向移动的值
 int ymove = 0;
 int ww = 0;//窗口宽度
+int wh = 0;//窗口宽度
 int PositionOfX[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };//表达式中有x的位置
 int cxChar;
 int cyChar;
 int Command;//全局保存 nCmdShow
+char ex[max1];/*存储后缀表达式*/
 
 bool flag4Check = true;
 bool isTheFistTime = true;//判断是否开始新的绘图  以决定是否invalidateRect
 bool flag4DidntDraw = false;
 bool flag4NotDraw = true;//x值不能取的时候不绘图
 bool flag4Drawing = false;//代表正在绘图
-char ex[max1];/*存储后缀表达式*/
 bool computed = true;//标志 是否已经计算过表达式
 bool flag4TAN = false;//tan函数
 bool flag4Factorial = false;//表达式里面是否有 阶乘，若有，则不支持绘图
@@ -135,7 +135,7 @@ void expressionRepair(TCHAR* str){
 
 //建立绘函数图像的子窗口
 void CreateNewChildWindow(HWND hWND, HWND* h4ChildWND){
-	if (expression4Display[0] != 'y'||!flag4Check)
+	if (expression4Display[0] != 'y' || expression4Display[1] != '=' || !flag4Check)
 	{
 		flag4Check = FALSE;
 		expression[0] = '\0';
@@ -582,12 +582,13 @@ void compvalue()
 		t++;
 	}
 
-	if (flag4TAN)//如果是画tan的图的话
-		if (abs(abs(result) - abs(stack[top])) > 10)  //两个值差距太大就不绘图
+	//舍弃
+	/*if (flag4TAN)//如果是画tan的图的话
+		if (abs(abs(result) -abs(stack[top])) >= wh/53)  //两个值差距太大就不绘图
 		{
-		flag4NotDraw = true;
+		//flag4NotDraw = true;
 		flag4TAN = false;
-		}
+		}*/
 
 	if (top >= 0)
 		result = stack[top];
@@ -613,7 +614,6 @@ void compvalue()
 	{
 		ZeroMemory(value, lstrlen(value)*sizeof(value[0]));
 	}
-	//for (i = 0; i < lstrlen(BufferBuffer);)
 	int availableAmount;//有效数字的位数
 	if (result!=0)//因为结果是0 的话,有效数字位数检测出来就是0了.这样就不会显示结果了
 		for (availableAmount = lstrlen(szBuffer); availableAmount > 0; availableAmount--)
