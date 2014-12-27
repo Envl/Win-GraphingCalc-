@@ -6,7 +6,7 @@
 #include<math.h>
 #include<string.h>
 #define max1 200
-#define Point_Sum 3000
+#define Point_Sum 2000//最后决定改成2000,毕竟大家分辨率都不高
 #define MAX_LOADSTRING 100
 
 // 全局变量: 

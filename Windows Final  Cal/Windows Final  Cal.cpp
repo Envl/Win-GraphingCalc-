@@ -819,9 +819,10 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 	case 0x020A://WM_MOUSEWHEEL
 		//实现鼠标滚轮缩放大小
 		if ((INT)wParam > 0)
-			d *=1.03;
+				d *= 1.03;
 		else
-			d /= 1.03;
+			if (d>1.3324129472398069e-006)
+				d /= 1.03;
 		InvalidateRect(hwnd, NULL, TRUE);
 		break;
 	case WM_CHAR:
@@ -846,11 +847,12 @@ LRESULT CALLBACK Wnd4DrawingProc(HWND hwnd, UINT message,
 				break;
 			}
 			case '-':
-				d /= 1.05;
+					d /= 1.05;
 				InvalidateRect(hwnd, &wndRect, true);//无效化客 户区 促使产生  WM_PAINT
 				break;
 			case '+':case '=':
-				d *= 1.05;
+					if (d>1.3324129472398069e-006)
+						d *= 1.05;
 				InvalidateRect(hwnd, &wndRect, true);//无效化客户区 促使产生  WM_PAINT
 				break;
 			case 'z':case 'c':
