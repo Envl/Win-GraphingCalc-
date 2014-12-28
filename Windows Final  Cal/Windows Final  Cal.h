@@ -190,6 +190,12 @@ bool BracketCommonOperatorCheck(TCHAR* str)
 	int i=0;
 	while (str[i] != '#')
 	{
+		//画图时 表达式等号右边不允许有 y/= 存在
+		if (str[i] == 'y' || str[i] == '=')
+		{
+			flag4Check = false;
+			return FALSE;
+		}
 		if (str[i] == '(')
 			lBracketCounter++;
 		if (str[i] == ')')
@@ -256,13 +262,17 @@ bool expressionCheck4Drawing(TCHAR* str){//这是给函数绘图用的
 		//对应的第  i  个字符是否存在于buttonText中   false代表不存在
 		flag4Check = false;
 
-		for (int j = 0; j < NUM; j++){
-			if (str[i] == *buttonText[j]){
+		for (int j = 0; j < NUM; j++)
+		{
+			if (str[i] == *buttonText[j])
+			{
 				flag4Check = true;
 				return TRUE;
 			}
 		}
-		if (!flag4Check){
+
+		if (!flag4Check)
+		{
 			return FALSE;
 		}
 		i++;

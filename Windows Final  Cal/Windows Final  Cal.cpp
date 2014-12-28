@@ -163,6 +163,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	BITMAP bm;
 	HDC hdcTemp;
 	TCHAR tmpChar;//用来键盘输入各种算术符号
+	static bool flag4Bkground=false;//指示当前壁纸,暂时只有两款
 	switch (message)
 	{
 	
@@ -199,7 +200,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONDOWN: //当鼠标左键点击时可以拖曳窗口  
 		SendMessage(hWnd, WM_SYSCOMMAND, SC_MOVE | HTCAPTION, 0);
 		break;
-	
+
 	case WM_ERASEBKGND: //在窗口背景中直接贴图  
 		hdc = (HDC)wParam;
 		int nWidth, nHeight;
@@ -435,6 +436,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			switch (wParam)
 			{
+			case 'b'://换壁纸
+			{
+				hdc = GetDC(hWnd);
+				if (flag4Bkground)
+				{
+					hBitmap = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAPNewBG));//
+					flag4Bkground = false;
+				}
+				else
+				{
+					hBitmap = (HBITMAP)LoadBitmap(hInst, MAKEINTRESOURCE(IDB_BITMAPBG));//
+					flag4Bkground = true;
+				}
+
+				if (hBitmap == NULL)
+				{
+					MessageBox(NULL, TEXT("主界面位图加载失败"), TEXT("Error"), MB_ICONERROR);
+					return 0;
+				}
+				hdcTemp = CreateCompatibleDC(hdc);
+				SelectObject(hdcTemp, hBitmap);
+				int nWidth, nHeight;
+				GetWindowSize(hWnd, &nWidth, &nHeight);
+				GetObject(hBitmap, sizeof(bm), &bm);
+				StretchBlt(s_hdcMem, 0, 0, nWidth, nHeight, hdcTemp, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+				
+				DeleteObject(hdcTemp);
+				ReleaseDC(hWnd,hdc);
+				InvalidateRect(hWnd, NULL, TRUE);
+				//SendMessage(hWnd, WM_CREATE, 1, 1);
+				SendMessage(hWnd, WM_ERASEBKGND, 1, 1);
+			}
+				break;
 			case'\b':   //backspace
 				SendMessage(hWnd, WM_COMMAND, 3, 1);
 				break;
