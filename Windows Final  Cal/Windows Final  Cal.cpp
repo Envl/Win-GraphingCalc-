@@ -177,6 +177,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			hdc = GetDC(hWnd);
 			hdcTemp = CreateCompatibleDC(hdc);
 			SelectObject(hdcTemp, hBitmap);
+			
 
 			// 得到窗口大小  
 			int nWidth, nHeight;
